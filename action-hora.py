@@ -31,11 +31,17 @@ def intent_received(hermes, intent_message):
 
 	if intent_message.intent.intent_name == 'gplaza:askTime':
 
-		sentence = 'Es las '
+
 		print(intent_message.intent.intent_name)
-
 		now = datetime.now(timezone('America/Santiago'))
-
+		
+		if now.hour == 0:
+			sentence = 'Es la '
+		elif now.hour == 1:
+			sentence = 'Es la '
+		else:
+			sentence = 'Son las '
+		
 		sentence += verbalise_hour(now.hour) + " " + verbalise_minute(now.minute)
 		print(sentence)
 
