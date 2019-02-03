@@ -15,5 +15,5 @@ then
 
 fi
 
-. $VENV/bin/activate
+. $PWD/$VENV/bin/activate
 pip install -r requirements.txt
