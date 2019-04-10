@@ -10,11 +10,11 @@ APP en la consola de Snips
 ## Instalación desde SAM
 La forma más sencilla de instalar este Skill es mediante [Sam](https://snips.gitbook.io/getting-started/installation)
 
-`sam install actions -g https://github.com/auveele/snips-skill-hora.git`
+`sam install actions -g https://github.com/gplaza/snips-skill-hora.git`
 
 ## Instalación manual
 - Ir a la carpeta `/var/lib/snips/skills`
-- Clona este repositorio: `git clone https://github.com/auveele/snips-skill-hora.git`
+- Clona este repositorio: `git clone https://github.com/gplaza/snips-skill-hora.git`
 - Ejecuta el script `sh setup.sh` (esto creará el entorno virtual necesario)
 - Reinicia el servicio de Skills de Snips `sudo service snips-skill-server restart`
 
@@ -25,7 +25,7 @@ Por defecto, está configurado para España.
 ```
 [skill]
 timezone: Europe/Madrid
-intent_name: auveele:askTime
+intent_name: gplaza:askTime
 ```
 
 ## Lista de pendientes
