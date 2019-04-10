@@ -1,56 +1,94 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python3
+
 from hermes_python.hermes import Hermes
+from hermes_python.ffi.utils import MqttOptions
+from hermes_python.ontology import *
+import config
+
 from datetime import datetime
 from pytz import timezone
 
-MQTT_IP_ADDR = "localhost"
-MQTT_PORT = 1883
-MQTT_ADDR = "{}:{}".format(MQTT_IP_ADDR, str(MQTT_PORT))
+
+class actionHour:
+    '''
+    '''
+
+    def __init__(self):
+        self.load_config()
+        mqtt_opts = MqttOptions(username=self.mqtt_user,
+                                password=self.mqtt_pass,
+                                broker_address=self.mqtt_host)
+
+        with Hermes(mqtt_options=mqtt_opts) as h:
+            h.subscribe_intents(self.intent_received).loop_forever()
+
+    def load_config(self):
+        print("Cargando información... ")
+
+        # Load MQTT credentials
+        mqtt_config = config.get_mqtt_config()
+        if mqtt_config is None:
+            exit(1)
+        self.mqtt_user = mqtt_config['mqtt_username']
+        self.mqtt_pass = mqtt_config['mqtt_password']
+        self.mqtt_host = mqtt_config['mqtt']
+
+        # Load Skill configuration
+        config_needed = [{'group': 'skill',
+                          'items': ['timezone',
+                                    'intent_name'
+                                    ],
+                          }
+                         ]
+        skill_config = config.get_skill_config(config_needed)
+        if skill_config is None:
+            exit(1)
+
+        self.intent_name = skill_config['intent_name']
+        self.timezone = skill_config['timezone']
+
+    def intent_received(self, hermes, intent_message):
+        '''
+            Recibimos el Intent
+        '''
+        print("INTENT: {0}".format(intent_message.intent.intent_name))
+
+        if intent_message.intent.intent_name == self.intent_name:
+            print(intent_message.intent.intent_name)
+            now = datetime.now(timezone(self.timezone))
+
+            if now.hour == 1:
+                sentence = 'Es la '
+            else:
+                sentence = 'Son las '
+
+            sentence += self.verbalize_hour(now.hour) + " " + \
+                self.verbalize_minute(now.minute)
+            sentence = sentence.strip()
+
+            print("ANSWER: {}".format(sentence))
+            hermes.publish_end_session(intent_message.session_id, sentence)
+
+    def verbalize_hour(self, i):
+        '''
+           Convertimos hora a texto
+        '''
+        if i == 0:
+            return "media noche"
+        elif i == 1:
+            return "una"
+        else:
+            return "{0}".format(str(i))
+
+    def verbalize_minute(self, i):
+        '''
+            Convertimos minutos a texto
+        '''
+        if i == 0:
+            return ""
+        else:
+            return "{0}".format(str(i))
 
 
-def verbalise_hour(i):
-	if i == 0:
-		return "media noche"
-	elif i == 1:
-		return "una"
-	else:
-		return "{0} horas".format(str(i)) 
-
-def verbalise_minute(i):
-	if i == 0:
-		return ""
-	else:
-		return "{0}".format(str(i)) 
-
-
-def intent_received(hermes, intent_message):
-
-	print()
-	print(intent_message.intent.intent_name)
-	print ()
-
-	if intent_message.intent.intent_name == 'gplaza:askTime':
-
-
-		print(intent_message.intent.intent_name)
-		now = datetime.now(timezone('America/Santiago'))
-		
-		if now.hour == 0:
-			sentence = 'Es la '
-		elif now.hour == 1:
-			sentence = 'Es la '
-		else:
-			sentence = 'Son las '
-		
-		sentence += verbalise_hour(now.hour) + " " + verbalise_minute(now.minute)
-		print(sentence)
-
-		hermes.publish_end_session(intent_message.session_id, sentence)
-
-	elif intent_message.intent.intent_name == 'gplaza:greetings':
-
-		hermes.publish_end_session(intent_message.session_id, "De nada!")
-
-
-with Hermes(MQTT_ADDR) as h:
-	h.subscribe_intents(intent_received).start()
+if __name__ == "__main__":
+    action_hour = actionHour()
