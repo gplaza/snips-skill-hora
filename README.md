@@ -3,9 +3,7 @@
 Versión 1.1
 
 ## Snips.ai
-APP en la consola de Snips
-
-
+[APP](https://console.snips.ai/store/es/skill_m6K1Kv6kPbe) en la consola de Snips
 
 ## Instalación desde SAM
 La forma más sencilla de instalar este Skill es mediante [Sam](https://snips.gitbook.io/getting-started/installation)

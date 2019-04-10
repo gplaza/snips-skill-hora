@@ -15,12 +15,17 @@ class actionHour:
 
     def __init__(self):
         self.load_config()
-        mqtt_opts = MqttOptions(username=self.mqtt_user,
-                                password=self.mqtt_pass,
-                                broker_address=self.mqtt_host)
+        if (self.mqtt_user is not None and
+            self.mqtt_pass is not None and
+                self.mqtt_pass is not None):
+            mqtt_opts = MqttOptions(username=self.mqtt_user,
+                                    password=self.mqtt_pass,
+                                    broker_address=self.mqtt_host)
+        else:
+            mqtt_opts = MqttOptions(broker_address=self.mqtt_host)
 
         with Hermes(mqtt_options=mqtt_opts) as h:
-            h.subscribe_intents(self.intent_received).loop_forever()
+            h.subscribe_intents(self.intent_received).start()
 
     def load_config(self):
         print("Cargando información... ")
@@ -29,12 +34,20 @@ class actionHour:
         mqtt_config = config.get_mqtt_config()
         if mqtt_config is None:
             exit(1)
-        self.mqtt_user = mqtt_config['mqtt_username']
-        self.mqtt_pass = mqtt_config['mqtt_password']
-        self.mqtt_host = mqtt_config['mqtt']
+
+        self.mqtt_user = None
+        self.mqtt_pass = None
+        self.mqtt_host = None
+
+        if 'mqtt_username' in mqtt_config:
+            self.mqtt_user = mqtt_config['mqtt_username']
+        if 'mqtt_password' in mqtt_config:
+            self.mqtt_pass = mqtt_config['mqtt_password']
+        if 'mqtt' in mqtt_config:
+            self.mqtt_host = mqtt_config['mqtt']
 
         # Load Skill configuration
-        config_needed = [{'group': 'skill',
+        config_needed = [{'group': 'global',
                           'items': ['timezone',
                                     'intent_name'
                                     ],
